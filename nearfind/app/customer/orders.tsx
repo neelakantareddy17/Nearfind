@@ -1,33 +1,75 @@
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
-import { OrderCard } from "../../components/OrderCard";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
-import { mockOrders } from "../../lib/mockData";
+import { subscribeCustomerOrders } from "../../services/customerOrderService";
+
+const statuses = [
+  "PLACED",
+  "ACCEPTED",
+  "PACKED",
+  "READY_FOR_PICKUP",
+  "PICKED_UP",
+  "DELIVERED",
+];
 
 export default function CustomerOrdersScreen() {
-  const activeOrders = mockOrders.filter((order) => order.status !== "Delivered");
-  const pastOrders = mockOrders.filter((order) => order.status === "Delivered");
+  const [orders, setOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeCustomerOrders(
+      setOrders
+    );
+
+    return unsubscribe;
+  }, []);
+
+ return (
+  <RoleScreenShell
+    role="customer"
+    activeTab="orders"
+    roleHomeLabel="Home"
+    title="Orders"
+    subtitle="Track each order through the fulfillment flow."
+    showBack
+  >
+    <View style={{ gap: 18 }}>
+      {orders.map((order) => (
+        <View
+          key={order.id}
+          style={{
+            backgroundColor: "#FFFFFF",
+            padding: 16,
+            borderRadius: 16,
+          }}
+        >
+          <Text>{order.productName}</Text>
+         <Text style={{ marginBottom: 16 }}>
+  Current Status: {order.status}
+</Text>
+
+{statuses.map((status, index) => {
+  const currentIndex = statuses.indexOf(order.status);
 
   return (
-    <RoleScreenShell
-      role="customer"
-      activeTab="orders"
-      roleHomeLabel="Home"
-      title="Orders"
-      subtitle="Track each order through the local fulfillment flow."
-      showBack
-    >
-      <View style={{ gap: 18 }}>
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111" }}>Active tracking</Text>
-        {activeOrders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginTop: 6 }}>Order history</Text>
-        {pastOrders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
-      </View>
-    </RoleScreenShell>
+    <Text
+  key={status}
+  style={{
+    marginBottom: 8,
+    fontSize: 15,
+    color:
+      index <= currentIndex
+        ? "#1E7A43"
+        : "#999999",
+  }}
+>
+  {index <= currentIndex ? "✓" : "○"} {status}
+</Text>
   );
+})}
+        </View>
+      ))}
+    </View>
+  </RoleScreenShell>
+);
 }

@@ -5,8 +5,16 @@ import { OrderCard } from "../../components/OrderCard";
 import { ProductCard } from "../../components/ProductCard";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { mockOrders, mockProducts } from "../../lib/mockData";
-
+import { useEffect, useState } from "react";
+import { getProducts } from "../../services/productService";
 export default function CustomerDashboard() {
+  const [products, setProducts] = useState<any[]>([]);
+
+useEffect(() => {
+  getProducts()
+    .then(setProducts)
+    .catch(console.error);
+}, []);
   return (
     <RoleScreenShell
       role="customer"
@@ -37,9 +45,30 @@ export default function CustomerDashboard() {
         </View>
 
         <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginBottom: 12 }}>Featured products</Text>
-        {mockProducts.slice(0, 3).map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {products.length === 0 ? (
+  <Text>Loading products...</Text>
+) : (
+  products.map((product) => (
+    <View
+      key={product.id}
+      style={{
+        backgroundColor: "#FFFFFF",
+        padding: 16,
+        borderRadius: 16,
+        marginBottom: 10,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "700",
+        }}
+      >
+        {product.name}
+      </Text>
+    </View>
+  ))
+)}
 
         <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginTop: 8, marginBottom: 12 }}>Recent orders</Text>
         {mockOrders.slice(0, 2).map((order) => (

@@ -1,23 +1,31 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { ProductCard } from "../../components/ProductCard";
-import { mockProducts } from "../../lib/mockData";
-
+import { subscribeInventory } from "../../services/inventoryService";
+import { createOrder } from "../../services/orderService";
 export default function CustomerSearchScreen() {
   const [query, setQuery] = useState("");
+const [inventory, setInventory] = useState<any[]>([]);
+
+useEffect(() => {
+  const unsubscribe =
+    subscribeInventory(setInventory);
+
+  return unsubscribe;
+}, []);
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) {
-      return mockProducts;
+      return inventory;
     }
 
-    return mockProducts.filter((product) =>
-      [product.name, product.retailer, product.status].some((field) => field.toLowerCase().includes(normalized)),
-    );
-  }, [query]);
+    return inventory.filter((item) =>
+  item.productName?.toLowerCase().includes(normalized)
+);
+  }, [query,inventory]);
 
   return (
     <RoleScreenShell
@@ -42,9 +50,86 @@ export default function CustomerSearchScreen() {
 
         <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111" }}>{filteredProducts.length} results</Text>
 
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {filteredProducts.map((item) => (
+  <View
+    key={item.id}
+    style={{
+      backgroundColor: "#FFFFFF",
+      padding: 16,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: "#E8E8E3",
+      gap: 8,
+    }}
+  >
+    <Text
+      style={{
+        fontSize: 18,
+        fontWeight: "700",
+      }}
+    >
+      {item.productName}
+    </Text>
+
+    <Text>
+      {item.retailerName}
+    </Text>
+
+    <Text>
+      ₹{item.price}
+    </Text>
+
+    <Text>
+  Stock: {item.stock}
+</Text>
+
+{item.stock <= 0 && (
+  <Text
+    style={{
+      color: "#D9534F",
+      fontWeight: "700",
+      marginTop: 4,
+    }}
+  >
+    Out of Stock
+  </Text>
+)}
+    <Pressable
+    
+  disabled={item.stock <= 0}
+  onPress={async () => {
+    try {
+      await createOrder(item);
+      alert("Order placed successfully");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to place order");
+    }
+  }}
+      style={{
+        marginTop: 8,
+      backgroundColor:
+  item.stock <= 0
+    ? "#BDBDBD"
+    : "#111111",
+        paddingVertical: 12,
+        borderRadius: 12,
+        alignItems: "center",
+      }}
+    >
+      <Text
+  style={{
+    color: "#FFFFFF",
+    fontWeight: "700",
+  }}
+>
+  {item.stock <= 0
+    ? "Out of Stock"
+    : "Order"}
+</Text>
+    </Pressable>
+  </View>
+))}
       </View>
     </RoleScreenShell>
   );
