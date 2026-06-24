@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { roleNavigation, type RoleTabKey } from "../lib/roleNavigation";
 import { COLORS, RADIUS, SHADOW, SPACING } from "../lib/theme";
-
+import { useCart } from "../context/CartContext";
 type RoleScreenShellProps = {
   title: string;
   subtitle?: string;
@@ -19,6 +19,7 @@ type RoleScreenShellProps = {
 
 const tabIcons = {
   home: "home",
+  search: "magnify",
   orders: "receipt",
   profile: "account",
 } as const;
@@ -35,10 +36,12 @@ export function RoleScreenShell({
   const router = useRouter();
   const pathname = usePathname();
   const navigation = roleNavigation[role];
-
-  const activeKey =
-    pathname === navigation.home
-      ? "home"
+const { items } = useCart();
+ const activeKey =
+  pathname === navigation.home
+    ? "home"
+    : pathname === navigation.search
+      ? "search"
       : pathname === navigation.orders
         ? "orders"
         : pathname === navigation.profile
@@ -55,16 +58,18 @@ export function RoleScreenShell({
   };
 
   const tabRoutes: Record<RoleTabKey, string> = {
-    home: navigation.home,
-    orders: navigation.orders,
-    profile: navigation.profile,
-  };
+  home: navigation.home,
+  search: navigation.search,
+  orders: navigation.orders,
+  profile: navigation.profile,
+};
 
-  const tabLabels: Record<RoleTabKey, string> = {
-    home: roleHomeLabel,
-    orders: navigation.ordersTitle,
-    profile: navigation.profileTitle,
-  };
+ const tabLabels: Record<RoleTabKey, string> = {
+  home: roleHomeLabel,
+  search: "Search",
+  orders: navigation.ordersTitle,
+  profile: navigation.profileTitle,
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -88,10 +93,68 @@ export function RoleScreenShell({
           </View>
 
           {!showBack ? (
-            <Pressable onPress={() => router.push(navigation.profile)} hitSlop={10} style={styles.profileShortcut}>
-              <MaterialCommunityIcons name="account-circle" size={28} color={COLORS.text} />
-            </Pressable>
-          ) : null}
+  <View
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    }}
+  >
+    {role === "customer" && (
+      <Pressable
+        onPress={() =>
+          router.push("/customer/cart")
+        }
+      >
+        <MaterialCommunityIcons
+          name="cart-outline"
+          size={28}
+          color={COLORS.text}
+        />
+
+        {items.length > 0 && (
+          <View
+            style={{
+              position: "absolute",
+              right: -6,
+              top: -4,
+              backgroundColor: "#000",
+              borderRadius: 10,
+              minWidth: 18,
+              height: 18,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Text
+              style={{
+                color: "#FFF",
+                fontSize: 10,
+                fontWeight: "700",
+              }}
+            >
+              {items.length}
+            </Text>
+          </View>
+        )}
+      </Pressable>
+    )}
+
+    <Pressable
+      onPress={() =>
+        router.push(navigation.profile)
+      }
+      hitSlop={10}
+      style={styles.profileShortcut}
+    >
+      <MaterialCommunityIcons
+        name="account-circle"
+        size={28}
+        color={COLORS.text}
+      />
+    </Pressable>
+  </View>
+) : null}
         </View>
 
         <ScrollView

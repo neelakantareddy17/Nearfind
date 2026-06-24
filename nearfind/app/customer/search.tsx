@@ -7,11 +7,12 @@ import { OrderSuccessModal } from "../../components/OrderSuccessModal";
 import { subscribeInventory } from "../../services/inventoryService";
 import { createOrder } from "../../services/orderService";
 import { COLORS, RADIUS, SPACING } from "../../lib/theme";
-
+import { useCart } from "../../context/CartContext";
 export default function CustomerSearchScreen() {
   const [query, setQuery] = useState("");
   const [inventory, setInventory] = useState<any[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const unsubscribe =
@@ -96,12 +97,12 @@ export default function CustomerSearchScreen() {
 
             {item.stock > 0 ? (
               <Button
-                label="Order"
-                onPress={() => handleCreateOrder(item)}
-                variant="primary"
-                size="medium"
-                fullWidth
-              />
+  label="Add To Cart"
+  onPress={() => addToCart(item)}
+  variant="primary"
+  size="medium"
+  fullWidth
+/>
             ) : (
               <Button
                 label="Out of Stock"

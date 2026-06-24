@@ -4,19 +4,29 @@ import { Text, View } from "react-native";
 import { OrderCard } from "../../components/OrderCard";
 import { Button } from "../../components/Button";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
-import { mockOrders, mockProducts } from "../../lib/mockData";
+import { subscribeCustomerOrders } from "../../services/customerOrderService";
 import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
 import { COLORS, RADIUS, SPACING } from "../../lib/theme";
 
 export default function CustomerDashboard() {
   const [products, setProducts] = useState<any[]>([]);
+const [recentOrders, setRecentOrders] =
+  useState<any[]>([]);
 
   useEffect(() => {
     getProducts()
       .then(setProducts)
       .catch(console.error);
   }, []);
+  useEffect(() => {
+  const unsubscribe =
+    subscribeCustomerOrders(
+      setRecentOrders
+    );
+
+  return unsubscribe;
+}, []);
 
   return (
     <RoleScreenShell
@@ -32,22 +42,17 @@ export default function CustomerDashboard() {
           <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.lg }}>
             Start shopping or track your orders
           </Text>
-          <View style={{ flexDirection: "row", gap: SPACING.md }}>
-            <Button
-              label="Search"
-              onPress={() => router.push("/customer/search")}
-              variant="primary"
-              size="medium"
-              fullWidth
-            />
-            <Button
-              label="Orders"
-              onPress={() => router.push("/customer/orders")}
-              variant="secondary"
-              size="medium"
-              fullWidth
-            />
-          </View>
+       <View>
+  <Text
+    style={{
+      fontSize: 14,
+      color: COLORS.textSecondary,
+    }}
+  >
+    Browse products using Search below and
+    track your orders in real time.
+  </Text>
+</View>
         </View>
 
         {/* Featured Products */}
@@ -81,11 +86,59 @@ export default function CustomerDashboard() {
 
         {/* Recent Orders */}
         <View>
-          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Recent</Text>
-          {mockOrders.slice(0, 2).map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
+  <Text
+    style={{
+      fontSize: 16,
+      fontWeight: "600",
+      color: COLORS.text,
+      marginBottom: SPACING.md,
+    }}
+  >
+    Recent Orders
+  </Text>
+
+  {recentOrders.length === 0 ? (
+    <Text
+      style={{
+        color: COLORS.textSecondary,
+      }}
+    >
+      No orders yet
+    </Text>
+  ) : (
+    recentOrders
+      .slice(0, 3)
+      .map((order) => (
+        <View
+          key={order.id}
+          style={{
+            backgroundColor:
+              COLORS.card,
+            padding: SPACING.lg,
+            borderRadius:
+              RADIUS.card,
+            marginBottom:
+              SPACING.md,
+            borderWidth: 1,
+            borderColor:
+              COLORS.border,
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "600",
+            }}
+          >
+            {order.productName}
+          </Text>
+
+          <Text>
+            {order.status}
+          </Text>
         </View>
+      ))
+  )}
+</View>
       </View>
     </RoleScreenShell>
   );
