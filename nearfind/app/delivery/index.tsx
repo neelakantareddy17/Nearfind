@@ -1,115 +1,97 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import { OrderCard } from "../../components/OrderCard";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
-import { mockOrders } from "../../lib/mockData";
+import { Button } from "../../components/Button";
 import { subscribeDeliveryOrders } from "../../services/deliveryService";
 import { updateOrderStatus } from "../../services/orderUpdateService";
+import { COLORS, RADIUS, SPACING } from "../../lib/theme";
 
 export default function DeliveryDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
 
-useEffect(() => {
-  const unsubscribe =
-    subscribeDeliveryOrders(setOrders);
+  useEffect(() => {
+    const unsubscribe =
+      subscribeDeliveryOrders(setOrders);
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
+
   return (
     <RoleScreenShell
       role="delivery"
       activeTab="home"
       roleHomeLabel="Home"
       title="Delivery Dashboard"
-      subtitle="Pick up available deliveries and keep the handoff moving."
+      subtitle="Manage your deliveries"
     >
-      <View style={{ gap: 18 }}>
-        <Pressable
+      <View style={{ gap: SPACING.lg }}>
+        {/* View All Button */}
+        <Button
+          label="View all deliveries"
           onPress={() => router.push("/delivery/orders")}
-          style={{
-            borderRadius: 18,
-            paddingVertical: 14,
-            backgroundColor: "#111111",
-            alignItems: "center",
-            minHeight: 44,
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "#FFFFFF", fontWeight: "800" }}>View assigned deliveries</Text>
-        </Pressable>
+          variant="primary"
+          size="large"
+          fullWidth
+        />
 
-       {orders.map((order) => (
-  <View
-    key={order.id}
-    style={{
-      backgroundColor: "#FFFFFF",
-      padding: 16,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: "#E8E8E3",
-    }}
-  >
-    <Text
-      style={{
-        fontSize: 18,
-        fontWeight: "700",
-      }}
-    >
-      {order.productName}
-    </Text>
+        {/* Orders List */}
+        {orders.map((order) => (
+          <View
+            key={order.id}
+            style={{
+              backgroundColor: COLORS.card,
+              padding: SPACING.lg,
+              borderRadius: RADIUS.card,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "600",
+                color: COLORS.text,
+                marginBottom: SPACING.sm,
+              }}
+            >
+              {order.productName}
+            </Text>
 
-    <Text>
-      Customer: {order.customerName}
-    </Text>
+            <Text style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: "400", marginBottom: SPACING.sm }}>
+              Customer: {order.customerName}
+            </Text>
 
-    <Text>
-      Status: {order.status}
-    </Text>
+            <Text style={{ fontSize: 13, color: COLORS.text, fontWeight: "500", marginBottom: SPACING.lg }}>
+              Status: {order.status}
+            </Text>
 
-    {order.status === "READY_FOR_PICKUP" && (
-  <Pressable
-    onPress={() =>
-      updateOrderStatus(order.id, "PICKED_UP")
-    }
-    style={{
-      backgroundColor: "#1E7A43",
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 10,
-      marginTop: 12,
-      alignSelf: "flex-start",
-    }}
-  >
-    <Text style={{ color: "#FFFFFF" }}>
-      Picked Up
-    </Text>
-  </Pressable>
-)}
+            {order.status === "READY_FOR_PICKUP" && (
+              <Button
+                label="Picked Up"
+                onPress={() =>
+                  updateOrderStatus(order.id, "PICKED_UP")
+                }
+                variant="primary"
+                size="medium"
+                fullWidth
+              />
+            )}
 
-{order.status === "PICKED_UP" && (
-  <Pressable
-    onPress={() =>
-      updateOrderStatus(order.id, "DELIVERED")
-    }
-    style={{
-      backgroundColor: "#111111",
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 10,
-      marginTop: 12,
-      alignSelf: "flex-start",
-    }}
-  >
-    <Text style={{ color: "#FFFFFF" }}>
-      Delivered
-    </Text>
-  </Pressable>
-)}
-    
-  </View>
-))}
+            {order.status === "PICKED_UP" && (
+              <Button
+                label="Delivered"
+                onPress={() =>
+                  updateOrderStatus(order.id, "DELIVERED")
+                }
+                variant="primary"
+                size="medium"
+                fullWidth
+              />
+            )}
+          </View>
+        ))}
       </View>
     </RoleScreenShell>
   );

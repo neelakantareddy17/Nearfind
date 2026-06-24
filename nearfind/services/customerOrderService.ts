@@ -1,18 +1,33 @@
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "./firebase";
+import {
+  collection,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
+
+import { auth, db } from "./firebase";
 
 export function subscribeCustomerOrders(
   callback: (orders: any[]) => void
 ) {
-  return onSnapshot(
-    collection(db, "orders"),
-    (snapshot) => {
-      const orders = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+  const uid = auth.currentUser?.uid;
 
-      callback(orders);
-    }
+  if (!uid) {
+    callback([]);
+    return () => {};
+  }
+
+  const q = query(
+    collection(db, "orders"),
+    where("customerId", "==", uid)
   );
+
+  return onSnapshot(q, (snapshot) => {
+    const orders = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    callback(orders);
+  });
 }

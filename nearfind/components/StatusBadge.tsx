@@ -1,12 +1,13 @@
 import { Text, View } from "react-native";
+import { COLORS, SPACING, RADIUS } from "../lib/theme";
 
 const statusColors: Record<string, { backgroundColor: string; color: string; borderColor: string }> = {
-  Placed: { backgroundColor: "#F5F5F2", color: "#111111", borderColor: "#E4E4DF" },
-  Accepted: { backgroundColor: "#EEF8F0", color: "#1E5D35", borderColor: "#CDE9D4" },
-  Packed: { backgroundColor: "#ECF6F0", color: "#0F5132", borderColor: "#BEE3CB" },
-  "Ready For Pickup": { backgroundColor: "#E7F6EE", color: "#0B6B3A", borderColor: "#A8DFC0" },
-  "Picked Up": { backgroundColor: "#E8F4EA", color: "#146B3A", borderColor: "#B4E0C2" },
-  Delivered: { backgroundColor: "#EAF7EC", color: "#0E6F2C", borderColor: "#B8E4C0" },
+  Placed: { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
+  Accepted: { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
+  Packed: { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
+  "Ready For Pickup": { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
+  "Picked Up": { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
+  Delivered: { backgroundColor: COLORS.surface, color: COLORS.text, borderColor: COLORS.border },
 };
 
 export function StatusBadge({ status, compact = false }: { status: string; compact?: boolean }) {
@@ -16,15 +17,15 @@ export function StatusBadge({ status, compact = false }: { status: string; compa
     <View
       style={{
         alignSelf: "flex-start",
-        paddingHorizontal: compact ? 10 : 12,
-        paddingVertical: compact ? 5 : 6,
-        borderRadius: 999,
+        paddingHorizontal: compact ? SPACING.sm : SPACING.md,
+        paddingVertical: compact ? SPACING.xs : SPACING.sm,
+        borderRadius: RADIUS.pill,
         backgroundColor: palette.backgroundColor,
         borderWidth: 1,
         borderColor: palette.borderColor,
       }}
     >
-      <Text style={{ color: palette.color, fontSize: compact ? 11 : 12, fontWeight: "700" }}>{status}</Text>
+      <Text style={{ color: palette.color, fontSize: compact ? 11 : 12, fontWeight: "500" }}>{status}</Text>
     </View>
   );
 }

@@ -1,22 +1,24 @@
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { RoleScreenShell } from "../../components/RoleScreenShell";
+import { Button } from "../../components/Button";
 import { mockRetailers } from "../../lib/mockData";
 import { updateOrderStatus } from "../../services/orderUpdateService";
 import { subscribeRetailerOrders } from "../../services/retailerService";
+import { COLORS, RADIUS, SPACING } from "../../lib/theme";
 
 export default function RetailerDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
 
   useEffect(() => {
-  const unsubscribe = subscribeRetailerOrders(
-    setOrders
-  );
+    const unsubscribe = subscribeRetailerOrders(
+      setOrders
+    );
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
 
   return (
     <RoleScreenShell
@@ -24,24 +26,25 @@ export default function RetailerDashboard() {
       activeTab="home"
       roleHomeLabel="Home"
       title="Retailer Dashboard"
-      subtitle="Handle incoming orders with a calm, offline-first workflow."
+      subtitle="Manage incoming orders"
     >
-      <View style={{ gap: 18 }}>
+      <View style={{ gap: SPACING.lg }}>
+        {/* Info Card */}
         <View
           style={{
-            backgroundColor: "#E9F7EF",
-            borderRadius: 22,
-            padding: 16,
+            backgroundColor: COLORS.surface,
+            borderRadius: RADIUS.card,
+            padding: SPACING.lg,
             borderWidth: 1,
-            borderColor: "#CDE9D4",
+            borderColor: COLORS.border,
           }}
         >
           <Text
             style={{
-              fontSize: 13,
-              color: "#1E7A43",
-              fontWeight: "800",
-              marginBottom: 6,
+              fontSize: 12,
+              color: COLORS.textSecondary,
+              fontWeight: "500",
+              marginBottom: SPACING.sm,
             }}
           >
             Retailers
@@ -49,150 +52,150 @@ export default function RetailerDashboard() {
 
           <Text
             style={{
-              fontSize: 15,
-              color: "#2D5E3A",
-              lineHeight: 22,
+              fontSize: 14,
+              color: COLORS.text,
+              lineHeight: 20,
+              fontWeight: "500",
             }}
           >
             {mockRetailers.join(" • ")}
           </Text>
         </View>
 
-        <Pressable
+        {/* View Orders Button */}
+        <Button
+          label="Manage orders"
           onPress={() => router.push("/retailer/orders")}
-          style={{
-            borderRadius: 18,
-            paddingVertical: 14,
-            backgroundColor: "#111111",
-            alignItems: "center",
-            minHeight: 44,
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: "#FFFFFF",
-              fontWeight: "800",
-            }}
-          >
-            Manage incoming orders
-          </Text>
-        </Pressable>
+          variant="primary"
+          size="large"
+          fullWidth
+        />
 
+        {/* Recent Orders */}
         {orders.map((order) => (
           <View
             key={order.id}
             style={{
-              backgroundColor: "#FFFFFF",
-              borderRadius: 18,
-              padding: 16,
+              backgroundColor: COLORS.card,
+              borderRadius: RADIUS.card,
+              padding: SPACING.lg,
               borderWidth: 1,
-              borderColor: "#E8E8E3",
-              marginBottom: 12,
+              borderColor: COLORS.border,
             }}
           >
             <Text
               style={{
-                fontSize: 18,
-                fontWeight: "700",
-                marginBottom: 8,
+                fontSize: 16,
+                fontWeight: "600",
+                marginBottom: SPACING.sm,
+                color: COLORS.text,
               }}
             >
               {order.productName}
             </Text>
 
-            <Text>Customer: {order.customerName}</Text>
+            <Text style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: "400", marginBottom: SPACING.md }}>
+              Customer: {order.customerName}
+            </Text>
 
             <Text
               style={{
-                marginTop: 8,
-                fontWeight: "600",
+                marginBottom: SPACING.lg,
+                fontWeight: "500",
+                color: COLORS.text,
+                fontSize: 13,
               }}
             >
               Status: {order.status}
             </Text>
 
+            {/* Action Buttons */}
             {order.status === "PLACED" && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  gap: 10,
-                  marginTop: 12,
-                }}
-              >
-                <Pressable
+              <View style={{ flexDirection: "row", gap: SPACING.md }}>
+                <Button
+                  label="Accept"
                   onPress={() =>
                     updateOrderStatus(order.id, "ACCEPTED")
                   }
-                  style={{
-                    backgroundColor: "#1E7A43",
-                    paddingHorizontal: 16,
-                    paddingVertical: 10,
-                    borderRadius: 10,
-                  }}
-                >
-                  <Text style={{ color: "#FFFFFF" }}>
-                    Accept
-                  </Text>
-                </Pressable>
-
-                <Pressable
+                  variant="primary"
+                  size="medium"
+                  fullWidth
+                />
+                <Button
+                  label="Reject"
                   onPress={() =>
                     updateOrderStatus(order.id, "REJECTED")
                   }
-                  style={{
-                    backgroundColor: "#D9534F",
-                    paddingHorizontal: 16,
-                    paddingVertical: 10,
-                    borderRadius: 10,
-                  }}
-                >
-                  <Text style={{ color: "#FFFFFF" }}>
-                    Reject
-                  </Text>
-                </Pressable>
+                  variant="secondary"
+                  size="medium"
+                  fullWidth
+                />
               </View>
             )}
 
             {order.status === "ACCEPTED" && (
-              <Pressable
-                onPress={() =>
-                  updateOrderStatus(order.id, "PACKED")
-                }
-                style={{
-                  marginTop: 12,
-                  backgroundColor: "#F39C12",
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                  borderRadius: 10,
-                  alignSelf: "flex-start",
-                }}
-              >
-                <Text style={{ color: "#FFFFFF" }}>
-                  Packed
-                </Text>
-              </Pressable>
-            )}
+  <View
+    style={{
+      flexDirection: "row",
+      gap: SPACING.md,
+    }}
+  >
+    <Button
+      label="Mark Packed"
+      onPress={() =>
+        updateOrderStatus(order.id, "PACKED")
+      }
+      variant="primary"
+      size="medium"
+      fullWidth
+    />
+
+    <Button
+      label="Cancel"
+      onPress={() =>
+        updateOrderStatus(order.id, "CANCELLED")
+      }
+      variant="secondary"
+      size="medium"
+      fullWidth
+    />
+  </View>
+)}
 
             {order.status === "PACKED" && (
-              <Pressable
-                onPress={() =>
-                  updateOrderStatus(order.id, "READY_FOR_PICKUP")
-                }
-                style={{
-                  marginTop: 12,
-                  backgroundColor: "#2980B9",
-                  paddingHorizontal: 16,
-                  paddingVertical: 10,
-                  borderRadius: 10,
-                  alignSelf: "flex-start",
-                }}
-              >
-                <Text style={{ color: "#FFFFFF" }}>
-                  Ready For Pickup
-                </Text>
-              </Pressable>
-            )}
+  <View
+    style={{
+      flexDirection: "row",
+      gap: SPACING.md,
+    }}
+  >
+    <Button
+      label="Ready for Pickup"
+      onPress={() =>
+        updateOrderStatus(
+          order.id,
+          "READY_FOR_PICKUP"
+        )
+      }
+      variant="primary"
+      size="medium"
+      fullWidth
+    />
+
+    <Button
+      label="Cancel"
+      onPress={() =>
+        updateOrderStatus(
+          order.id,
+          "CANCELLED"
+        )
+      }
+      variant="secondary"
+      size="medium"
+      fullWidth
+    />
+  </View>
+)}
           </View>
         ))}
       </View>

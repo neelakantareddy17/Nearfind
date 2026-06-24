@@ -1,20 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 
 import { RoleScreenShell } from "../../components/RoleScreenShell";
-import { ProductCard } from "../../components/ProductCard";
+import { Button } from "../../components/Button";
+import { OrderSuccessModal } from "../../components/OrderSuccessModal";
 import { subscribeInventory } from "../../services/inventoryService";
 import { createOrder } from "../../services/orderService";
+import { COLORS, RADIUS, SPACING } from "../../lib/theme";
+
 export default function CustomerSearchScreen() {
   const [query, setQuery] = useState("");
-const [inventory, setInventory] = useState<any[]>([]);
+  const [inventory, setInventory] = useState<any[]>([]);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-useEffect(() => {
-  const unsubscribe =
-    subscribeInventory(setInventory);
+  useEffect(() => {
+    const unsubscribe =
+      subscribeInventory(setInventory);
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
 
   const filteredProducts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -23,9 +27,18 @@ useEffect(() => {
     }
 
     return inventory.filter((item) =>
-  item.productName?.toLowerCase().includes(normalized)
-);
-  }, [query,inventory]);
+      item.productName?.toLowerCase().includes(normalized)
+    );
+  }, [query, inventory]);
+
+  const handleCreateOrder = async (item: any) => {
+    try {
+      await createOrder(item);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <RoleScreenShell
@@ -33,103 +46,74 @@ useEffect(() => {
       activeTab="home"
       roleHomeLabel="Home"
       title="Search"
-      subtitle="Browse mock inventory from nearby retailers."
+      subtitle="Browse nearby retailers"
       showBack
     >
-      <View style={{ gap: 18 }}>
-        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 20, borderWidth: 1, borderColor: "#E8E8E3", paddingHorizontal: 16, paddingVertical: 12 }}>
-          <Text style={{ fontSize: 13, fontWeight: "800", color: "#111111", marginBottom: 8 }}>Search products</Text>
+      <OrderSuccessModal visible={showSuccess} onDismiss={() => setShowSuccess(false)} />
+
+      <View style={{ gap: SPACING.lg }}>
+        {/* Search Box */}
+        <View style={{ backgroundColor: COLORS.card, borderRadius: RADIUS.input, borderWidth: 1, borderColor: COLORS.border, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.md }}>
+          <Text style={{ fontSize: 12, fontWeight: "500", color: COLORS.text, marginBottom: SPACING.sm }}>Search products</Text>
           <TextInput
             value={query}
             onChangeText={setQuery}
             placeholder="Search Maggi, Milk, Bread..."
-            placeholderTextColor="#9A9A94"
-            style={{ fontSize: 15, color: "#111111", minHeight: 44 }}
+            placeholderTextColor={COLORS.textSecondary}
+            style={{ fontSize: 15, color: COLORS.text, minHeight: 40, fontWeight: "400" }}
           />
         </View>
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111" }}>{filteredProducts.length} results</Text>
+        {/* Results count */}
+        <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text }}>{filteredProducts.length} results</Text>
 
+        {/* Product List */}
         {filteredProducts.map((item) => (
-  <View
-    key={item.id}
-    style={{
-      backgroundColor: "#FFFFFF",
-      padding: 16,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: "#E8E8E3",
-      gap: 8,
-    }}
-  >
-    <Text
-      style={{
-        fontSize: 18,
-        fontWeight: "700",
-      }}
-    >
-      {item.productName}
-    </Text>
+          <View
+            key={item.id}
+            style={{
+              backgroundColor: COLORS.card,
+              padding: SPACING.lg,
+              borderRadius: RADIUS.card,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+              gap: SPACING.md,
+            }}
+          >
+            <View>
+              <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.sm }}>{item.productName}</Text>
+              <Text style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: "400" }}>{item.retailerName}</Text>
+            </View>
 
-    <Text>
-      {item.retailerName}
-    </Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: "500", color: COLORS.text }}>₹{item.price}</Text>
+                <Text style={{ fontSize: 12, color: COLORS.textSecondary, fontWeight: "400", marginTop: SPACING.xs }}>
+                  Stock: {item.stock}
+                </Text>
+              </View>
+            </View>
 
-    <Text>
-      ₹{item.price}
-    </Text>
-
-    <Text>
-  Stock: {item.stock}
-</Text>
-
-{item.stock <= 0 && (
-  <Text
-    style={{
-      color: "#D9534F",
-      fontWeight: "700",
-      marginTop: 4,
-    }}
-  >
-    Out of Stock
-  </Text>
-)}
-    <Pressable
-    
-  disabled={item.stock <= 0}
-  onPress={async () => {
-    try {
-      await createOrder(item);
-      alert("Order placed successfully");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to place order");
-    }
-  }}
-      style={{
-        marginTop: 8,
-      backgroundColor:
-  item.stock <= 0
-    ? "#BDBDBD"
-    : "#111111",
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: "center",
-      }}
-    >
-      <Text
-  style={{
-    color: "#FFFFFF",
-    fontWeight: "700",
-  }}
->
-  {item.stock <= 0
-    ? "Out of Stock"
-    : "Order"}
-</Text>
-    </Pressable>
-  </View>
-))}
+            {item.stock > 0 ? (
+              <Button
+                label="Order"
+                onPress={() => handleCreateOrder(item)}
+                variant="primary"
+                size="medium"
+                fullWidth
+              />
+            ) : (
+              <Button
+                label="Out of Stock"
+                onPress={() => {}}
+                variant="secondary"
+                size="medium"
+                fullWidth
+                disabled
+              />
+            )}
+          </View>
+        ))}
       </View>
     </RoleScreenShell>
   );

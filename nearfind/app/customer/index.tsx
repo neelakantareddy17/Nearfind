@@ -1,79 +1,91 @@
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { OrderCard } from "../../components/OrderCard";
-import { ProductCard } from "../../components/ProductCard";
+import { Button } from "../../components/Button";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { mockOrders, mockProducts } from "../../lib/mockData";
 import { useEffect, useState } from "react";
 import { getProducts } from "../../services/productService";
+import { COLORS, RADIUS, SPACING } from "../../lib/theme";
+
 export default function CustomerDashboard() {
   const [products, setProducts] = useState<any[]>([]);
 
-useEffect(() => {
-  getProducts()
-    .then(setProducts)
-    .catch(console.error);
-}, []);
+  useEffect(() => {
+    getProducts()
+      .then(setProducts)
+      .catch(console.error);
+  }, []);
+
   return (
     <RoleScreenShell
       role="customer"
       activeTab="home"
       roleHomeLabel="Home"
       title="Customer Dashboard"
-      subtitle="Browse nearby essentials and keep track of your live order flow."
+      subtitle="Browse, order, and track"
     >
-      <View style={{ gap: 18 }}>
-        <View style={{ backgroundColor: "#FFFFFF", borderRadius: 24, padding: 18, borderWidth: 1, borderColor: "#E8E8E3" }}>
-          <Text style={{ fontSize: 18, lineHeight: 26, fontWeight: "800", color: "#111111", marginBottom: 10 }}>
-            Search, order, and track from one clean dashboard.
+      <View style={{ gap: SPACING.lg }}>
+        {/* CTA Section */}
+        <View style={{ backgroundColor: COLORS.card, borderRadius: RADIUS.card, padding: SPACING.lg, borderWidth: 1, borderColor: COLORS.border }}>
+          <Text style={{ fontSize: 16, lineHeight: 24, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.lg }}>
+            Start shopping or track your orders
           </Text>
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <Pressable
+          <View style={{ flexDirection: "row", gap: SPACING.md }}>
+            <Button
+              label="Search"
               onPress={() => router.push("/customer/search")}
-              style={{ flex: 1, borderRadius: 18, paddingVertical: 14, backgroundColor: "#111111", alignItems: "center", minHeight: 44, justifyContent: "center" }}
-            >
-              <Text style={{ color: "#FFFFFF", fontWeight: "800" }}>Search products</Text>
-            </Pressable>
-            <Pressable
+              variant="primary"
+              size="medium"
+              fullWidth
+            />
+            <Button
+              label="Orders"
               onPress={() => router.push("/customer/orders")}
-              style={{ flex: 1, borderRadius: 18, paddingVertical: 14, backgroundColor: "#E9F7EF", borderWidth: 1, borderColor: "#CDE9D4", alignItems: "center", minHeight: 44, justifyContent: "center" }}
-            >
-              <Text style={{ color: "#1E7A43", fontWeight: "800" }}>Track orders</Text>
-            </Pressable>
+              variant="secondary"
+              size="medium"
+              fullWidth
+            />
           </View>
         </View>
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginBottom: 12 }}>Featured products</Text>
-        {products.length === 0 ? (
-  <Text>Loading products...</Text>
-) : (
-  products.map((product) => (
-    <View
-      key={product.id}
-      style={{
-        backgroundColor: "#FFFFFF",
-        padding: 16,
-        borderRadius: 16,
-        marginBottom: 10,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "700",
-        }}
-      >
-        {product.name}
-      </Text>
-    </View>
-  ))
-)}
+        {/* Featured Products */}
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Featured</Text>
+          {products.length === 0 ? (
+            <Text style={{ color: COLORS.textSecondary, fontWeight: "400" }}>Loading products...</Text>
+          ) : (
+            products.slice(0, 3).map((product) => (
+              <View
+                key={product.id}
+                style={{
+                  backgroundColor: COLORS.card,
+                  padding: SPACING.lg,
+                  borderRadius: RADIUS.card,
+                  marginBottom: SPACING.md,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.xs }}>
+                  {product.name}
+                </Text>
+                <Text style={{ fontSize: 13, color: COLORS.textSecondary, fontWeight: "400" }}>
+                  ₹{product.price}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginTop: 8, marginBottom: 12 }}>Recent orders</Text>
-        {mockOrders.slice(0, 2).map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        {/* Recent Orders */}
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Recent</Text>
+          {mockOrders.slice(0, 2).map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </View>
       </View>
     </RoleScreenShell>
   );

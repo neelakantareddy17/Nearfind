@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { OrderCard } from "../../components/OrderCard";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { mockOrders } from "../../lib/mockData";
+import { SPACING } from "../../lib/theme";
 
 export default function AvailableOrdersScreen() {
   const availableOrders = mockOrders.filter((order) => order.status === "Ready For Pickup" || order.status === "Packed");
@@ -13,10 +14,10 @@ export default function AvailableOrdersScreen() {
       activeTab="home"
       roleHomeLabel="Home"
       title="Available Deliveries"
-      subtitle="Mock delivery assignments ready for pickup."
+      subtitle="Ready for pickup"
       showBack
     >
-      <View style={{ gap: 18 }}>
+      <View style={{ gap: SPACING.lg }}>
         {availableOrders.map((order) => (
           <OrderCard key={order.id} order={order} />
         ))}

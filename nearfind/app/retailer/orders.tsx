@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { OrderCard } from "../../components/OrderCard";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { mockOrders } from "../../lib/mockData";
+import { COLORS, SPACING } from "../../lib/theme";
 
 export default function RetailerOrdersScreen() {
   const incomingOrders = mockOrders.filter((order) => order.status === "Placed" || order.status === "Accepted");
@@ -14,19 +15,23 @@ export default function RetailerOrdersScreen() {
       activeTab="orders"
       roleHomeLabel="Home"
       title="Orders"
-      subtitle="Review incoming and active retailer orders."
+      subtitle="Manage all orders"
       showBack
     >
-      <View style={{ gap: 18 }}>
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111" }}>Incoming orders</Text>
-        {incomingOrders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+      <View style={{ gap: SPACING.lg }}>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Incoming</Text>
+          {incomingOrders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </View>
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginTop: 6 }}>Active orders</Text>
-        {activeOrders.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Active</Text>
+          {activeOrders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </View>
       </View>
     </RoleScreenShell>
   );

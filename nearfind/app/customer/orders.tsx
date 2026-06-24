@@ -2,19 +2,25 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
 import { RoleScreenShell } from "../../components/RoleScreenShell";
+import { OrderTrackingStepper } from "../../components/OrderTrackingStepper";
 import { subscribeCustomerOrders } from "../../services/customerOrderService";
-
-const statuses = [
-  "PLACED",
-  "ACCEPTED",
-  "PACKED",
-  "READY_FOR_PICKUP",
-  "PICKED_UP",
-  "DELIVERED",
-];
+import { COLORS, RADIUS, SPACING } from "../../lib/theme";
 
 export default function CustomerOrdersScreen() {
   const [orders, setOrders] = useState<any[]>([]);
+  const activeOrders = orders.filter(
+  (order) =>
+    order.status !== "DELIVERED" &&
+    order.status !== "REJECTED" &&
+    order.status !== "CANCELLED"
+);
+
+const historyOrders = orders.filter(
+  (order) =>
+    order.status === "DELIVERED" ||
+    order.status === "REJECTED" ||
+    order.status === "CANCELLED"
+);
 
   useEffect(() => {
     const unsubscribe = subscribeCustomerOrders(
@@ -24,52 +30,108 @@ export default function CustomerOrdersScreen() {
     return unsubscribe;
   }, []);
 
- return (
-  <RoleScreenShell
-    role="customer"
-    activeTab="orders"
-    roleHomeLabel="Home"
-    title="Orders"
-    subtitle="Track each order through the fulfillment flow."
-    showBack
+  return (
+    <RoleScreenShell
+      role="customer"
+      activeTab="orders"
+      roleHomeLabel="Home"
+      title="Orders"
+      subtitle="Track your orders"
+      showBack
+    >
+     <View style={{ gap: SPACING.lg }}>
+  <Text
+    style={{
+      fontSize: 18,
+      fontWeight: "600",
+      color: COLORS.text,
+    }}
   >
-    <View style={{ gap: 18 }}>
-      {orders.map((order) => (
-        <View
-          key={order.id}
+    Active Orders
+  </Text>
+
+  {activeOrders.map((order) => (
+    <View
+      key={order.id}
+      style={{
+        backgroundColor: COLORS.card,
+        padding: SPACING.lg,
+        borderRadius: RADIUS.card,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+      }}
+    >
+      <View style={{ marginBottom: SPACING.lg }}>
+        <Text
           style={{
-            backgroundColor: "#FFFFFF",
-            padding: 16,
-            borderRadius: 16,
+            fontSize: 16,
+            fontWeight: "600",
+            color: COLORS.text,
+            marginBottom: SPACING.sm,
           }}
         >
-          <Text>{order.productName}</Text>
-         <Text style={{ marginBottom: 16 }}>
-  Current Status: {order.status}
-</Text>
+          {order.productName}
+        </Text>
 
-{statuses.map((status, index) => {
-  const currentIndex = statuses.indexOf(order.status);
+        <Text
+          style={{
+            fontSize: 13,
+            color: COLORS.textSecondary,
+          }}
+        >
+          Order ID: {order.id}
+        </Text>
+      </View>
 
-  return (
-    <Text
-  key={status}
-  style={{
-    marginBottom: 8,
-    fontSize: 15,
-    color:
-      index <= currentIndex
-        ? "#1E7A43"
-        : "#999999",
-  }}
->
-  {index <= currentIndex ? "✓" : "○"} {status}
-</Text>
-  );
-})}
-        </View>
-      ))}
+      <OrderTrackingStepper
+        currentStatus={order.status}
+      />
     </View>
-  </RoleScreenShell>
-);
+  ))}
+
+  <Text
+    style={{
+      fontSize: 18,
+      fontWeight: "600",
+      color: COLORS.text,
+      marginTop: SPACING.lg,
+    }}
+  >
+    Order History
+  </Text>
+
+  {historyOrders.map((order) => (
+    <View
+      key={order.id}
+      style={{
+        backgroundColor: COLORS.card,
+        padding: SPACING.lg,
+        borderRadius: RADIUS.card,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "600",
+          color: COLORS.text,
+        }}
+      >
+        {order.productName}
+      </Text>
+
+      <Text
+        style={{
+          marginTop: SPACING.sm,
+          color: COLORS.textSecondary,
+        }}
+      >
+        Status: {order.status}
+      </Text>
+    </View>
+  ))}
+</View>
+    </RoleScreenShell>
+  );
 }

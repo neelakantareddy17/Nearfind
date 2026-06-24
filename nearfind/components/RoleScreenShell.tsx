@@ -2,6 +2,7 @@ import { useRouter, usePathname } from "expo-router";
 import { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { roleNavigation, type RoleTabKey } from "../lib/roleNavigation";
 import { COLORS, RADIUS, SHADOW, SPACING } from "../lib/theme";
@@ -16,11 +17,11 @@ type RoleScreenShellProps = {
   children: ReactNode;
 };
 
-const tabIcons: Record<RoleTabKey, string> = {
-  home: "⌂",
-  orders: "≣",
-  profile: "◉",
-};
+const tabIcons = {
+  home: "home",
+  orders: "receipt",
+  profile: "account",
+} as const;
 
 export function RoleScreenShell({
   title,
@@ -72,7 +73,7 @@ export function RoleScreenShell({
           <View style={styles.headerLeft}>
             {showBack ? (
               <Pressable onPress={goBack} style={styles.backButton} hitSlop={10}>
-                <Text style={styles.backGlyph}>‹</Text>
+                <MaterialCommunityIcons name="chevron-left" size={24} color={COLORS.text} />
               </Pressable>
             ) : (
               <View style={styles.brandMark}>
@@ -88,7 +89,7 @@ export function RoleScreenShell({
 
           {!showBack ? (
             <Pressable onPress={() => router.push(navigation.profile)} hitSlop={10} style={styles.profileShortcut}>
-              <Text style={styles.profileGlyph}>◉</Text>
+              <MaterialCommunityIcons name="account-circle" size={28} color={COLORS.text} />
             </Pressable>
           ) : null}
         </View>
@@ -112,9 +113,13 @@ export function RoleScreenShell({
                 onPress={() => router.push(tabRoutes[key])}
                 style={({ pressed }) => [styles.tabButton, pressed && styles.tabPressed]}
               >
-                <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>{tabIcons[key]}</Text>
+                <MaterialCommunityIcons 
+                  name={tabIcons[key]} 
+                  size={24} 
+                  color={isActive ? COLORS.text : COLORS.textSecondary}
+                />
                 <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>{tabLabels[key]}</Text>
-                {isActive ? <View style={styles.activeDot} /> : <View style={styles.inactiveDot} />}
+                {isActive ? <View style={styles.activeDot} /> : null}
               </Pressable>
             );
           })}
@@ -148,32 +153,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: SPACING.md,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: RADIUS.button,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
-  },
-  backGlyph: {
-    color: COLORS.text,
-    fontSize: 28,
-    lineHeight: 28,
-    fontWeight: "700",
-    marginTop: -2,
   },
   brandMark: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: RADIUS.button,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.accent,
+    backgroundColor: COLORS.text,
   },
   brandMarkText: {
     color: "#FFFFFF",
@@ -182,33 +180,25 @@ const styles = StyleSheet.create({
   },
   headerTextWrap: {
     flex: 1,
-    gap: 2,
+    gap: SPACING.xs,
   },
   headerTitle: {
     color: COLORS.text,
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "600",
   },
   headerSubtitle: {
-    color: COLORS.muted,
+    color: COLORS.textSecondary,
     fontSize: 12,
     lineHeight: 16,
+    fontWeight: "400",
   },
   profileShortcut: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: RADIUS.button,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-  profileGlyph: {
-    color: COLORS.accent,
-    fontSize: 24,
-    lineHeight: 24,
-    fontWeight: "900",
   },
   body: {
     flex: 1,
@@ -226,48 +216,35 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     backgroundColor: COLORS.card,
-    paddingTop: 10,
-    paddingBottom: 12,
+    paddingTop: SPACING.md,
+    paddingBottom: SPACING.md,
     ...SHADOW,
   },
   tabButton: {
     minWidth: 72,
     minHeight: 56,
-    paddingHorizontal: 10,
+    paddingHorizontal: SPACING.sm,
     alignItems: "center",
     justifyContent: "center",
-    gap: 4,
-  },
-  tabIcon: {
-    color: COLORS.muted,
-    fontSize: 22,
-    lineHeight: 22,
-    fontWeight: "900",
-  },
-  tabIconActive: {
-    color: COLORS.accent,
+    gap: SPACING.xs,
   },
   tabPressed: {
-    opacity: 0.82,
+    opacity: 0.8,
   },
   tabLabel: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: COLORS.muted,
+    fontSize: 11,
+    fontWeight: "500",
+    color: COLORS.textSecondary,
   },
   tabLabelActive: {
-    color: COLORS.accent,
+    color: COLORS.text,
+    fontWeight: "600",
   },
   activeDot: {
-    width: 18,
+    width: 20,
     height: 3,
-    borderRadius: 999,
-    backgroundColor: COLORS.accent,
-  },
-  inactiveDot: {
-    width: 18,
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: "transparent",
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.text,
+    marginTop: SPACING.xs,
   },
 });

@@ -6,6 +6,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
+import { auth } from "./firebase";
 
 export async function createOrder(item: any) {
   const inventoryRef = doc(
@@ -44,8 +45,9 @@ export async function createOrder(item: any) {
       retailerId: item.retailerId,
       retailerName: item.retailerName,
 
-      customerId: "customer_1",
-      customerName: "Demo Customer",
+      customerId: auth.currentUser?.uid,
+customerName:
+  auth.currentUser?.email ?? "Customer",
 
       quantity: 1,
 

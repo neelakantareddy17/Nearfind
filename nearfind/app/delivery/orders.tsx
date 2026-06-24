@@ -1,9 +1,11 @@
 import { router } from "expo-router";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import { OrderCard } from "../../components/OrderCard";
+import { Button } from "../../components/Button";
 import { RoleScreenShell } from "../../components/RoleScreenShell";
 import { mockOrders } from "../../lib/mockData";
+import { COLORS, SPACING } from "../../lib/theme";
 
 export default function DeliveryOrdersScreen() {
   const acceptedDeliveries = mockOrders.filter((order) => order.status === "Ready For Pickup" || order.status === "Picked Up");
@@ -15,35 +17,31 @@ export default function DeliveryOrdersScreen() {
       activeTab="orders"
       roleHomeLabel="Home"
       title="Orders"
-      subtitle="Accepted deliveries and delivery history."
+      subtitle="Your deliveries"
       showBack
     >
-      <View style={{ gap: 18 }}>
-        <Pressable
+      <View style={{ gap: SPACING.lg }}>
+        <Button
+          label="Available deliveries"
           onPress={() => router.push("/delivery/available-orders")}
-          style={{
-            borderRadius: 18,
-            paddingVertical: 14,
-            backgroundColor: "#E9F7EF",
-            borderWidth: 1,
-            borderColor: "#CDE9D4",
-            alignItems: "center",
-            minHeight: 44,
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "#1E7A43", fontWeight: "800" }}>Open available deliveries</Text>
-        </Pressable>
+          variant="secondary"
+          size="large"
+          fullWidth
+        />
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111" }}>Accepted deliveries</Text>
-        {acceptedDeliveries.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>Active</Text>
+          {acceptedDeliveries.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </View>
 
-        <Text style={{ fontSize: 20, fontWeight: "800", color: "#111111", marginTop: 6 }}>Delivery history</Text>
-        {deliveryHistory.map((order) => (
-          <OrderCard key={order.id} order={order} />
-        ))}
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "600", color: COLORS.text, marginBottom: SPACING.md }}>History</Text>
+          {deliveryHistory.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </View>
       </View>
     </RoleScreenShell>
   );
